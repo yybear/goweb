@@ -4,11 +4,12 @@ import (
 	. "db"
 	. "entity"
 	"github.com/labstack/echo"
+	"log"
 	"net/http"
 	"strconv"
 )
 
-var users map[int64]User
+var users []User
 
 func init() {
 }
@@ -16,13 +17,22 @@ func init() {
 func CreateUser(c *echo.Context) {
 	u := new(User)
 
-	if c.Bind(u) == nil {
-		Dbmap.Insert(u)
-		c.JSON(http.StatusOK, u)
-	}
+	/*c.Request.ParseForm()
+	name = c.Request.Form.Get("name") // 这种方式获取必须先要ParseForm 。。。
+	log.Printf("name 44 %s", name)*/
+
+	name := c.Request.FormValue("name")
+	u.Name = name
+	log.Printf("name 44 %s", name)
+
+	//if c.Bind(u) == nil { 绑定需要request的 headertype 为application/json
+	Dbmap.Insert(u)
+	c.JSON(http.StatusOK, u)
+	//}
 }
 
 func GetUsers(c *echo.Context) {
+	Dbmap.Select(&users, "select * from users")
 	c.JSON(http.StatusOK, users)
 }
 
