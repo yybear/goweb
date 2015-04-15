@@ -5,13 +5,40 @@ import (
 	. "entity"
 	"github.com/labstack/echo"
 	"log"
+	"mw"
 	"net/http"
 	"strconv"
 )
 
-var users []User
-
 func init() {
+}
+
+func Login(c *echo.Context) {
+	r := c.Request
+
+	session := mw.GetSession(r)
+	if session != nil {
+		session.Invalidate()
+	}
+	name := c.Request.FormValue("name")
+	password := c.Request.FormValue("password")
+
+	num, _ := Dbmap.SelectInt("select count(*) from users where name=? and password=?", name, password)
+	if num == 1 {
+		session = mw.NewSession(r, c.Response.ResponseWriter)
+		c.JSON(http.StatusOK, "{\"code\":0}")
+	} else {
+		c.JSON(http.StatusOK, "{\"code\":1}")
+	}
+
+}
+
+func Logout(c *echo.Context) {
+	r := c.Request
+	session := mw.GetSession(r)
+	if session != nil {
+		session.Invalidate()
+	}
 }
 
 func CreateUser(c *echo.Context) {
@@ -23,7 +50,6 @@ func CreateUser(c *echo.Context) {
 
 	name := c.Request.FormValue("name")
 	u.Name = name
-	log.Printf("name 44 %s", name)
 
 	//if c.Bind(u) == nil { 绑定需要request的 headertype 为application/json
 	Dbmap.Insert(u)
@@ -32,6 +58,7 @@ func CreateUser(c *echo.Context) {
 }
 
 func GetUsers(c *echo.Context) {
+	var users []User
 	Dbmap.Select(&users, "select * from users")
 	c.JSON(http.StatusOK, users)
 }
@@ -42,4 +69,6 @@ func GetUser(c *echo.Context) {
 	user, _ := Dbmap.Get(User{}, id)
 
 	c.JSON(http.StatusOK, user)
+
+	defer log.Println("dddddddddd")
 }
