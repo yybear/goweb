@@ -1,17 +1,20 @@
 package main
 
 import (
-	. "action"
+	. "github.com/yybear/goweb/api"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/rs/cors"
 	"github.com/thoas/stats"
 	"log"
-	"mw"
+	. "github.com/yybear/goweb/helper"
+	"reflect"
+	"github.com/golang/glog"
 )
 
 func main() {
 	log.Println("starting ...")
+
 	e := echo.New()
 	e.Use(middleware.Logger)
 	e.Use(cors.Default().Handler)
@@ -19,7 +22,7 @@ func main() {
 	// https://github.com/thoas/stats
 	s := stats.New()
 	e.Use(s.Handler)
-	e.Use(mw.SessionAuth)
+	e.Use(SessionAuth)
 	// Route
 	e.Get("/stats", func(c *echo.Context) {
 		c.JSON(200, s.Data())

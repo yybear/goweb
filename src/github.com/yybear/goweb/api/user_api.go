@@ -1,11 +1,11 @@
-package action
+package api
 
 import (
-	. "db"
-	. "entity"
+	. "github.com/yybear/goweb/db"
+	. "github.com/yybear/goweb/entity"
 	"github.com/labstack/echo"
 	"log"
-	"mw"
+	. "github.com/yybear/goweb/helper"
 	"net/http"
 	"strconv"
 )
@@ -16,7 +16,7 @@ func init() {
 func Login(c *echo.Context) {
 	r := c.Request
 
-	session := mw.GetSession(r)
+	session := GetSession(r)
 	if session != nil {
 		session.Invalidate()
 	}
@@ -25,7 +25,7 @@ func Login(c *echo.Context) {
 
 	num, _ := Dbmap.SelectInt("select count(*) from users where name=? and password=?", name, password)
 	if num == 1 {
-		session = mw.NewSession(r, c.Response.ResponseWriter)
+		session = NewSession(r, c.Response.ResponseWriter)
 		c.JSON(http.StatusOK, "{\"code\":0}")
 	} else {
 		c.JSON(http.StatusOK, "{\"code\":1}")
@@ -35,7 +35,7 @@ func Login(c *echo.Context) {
 
 func Logout(c *echo.Context) {
 	r := c.Request
-	session := mw.GetSession(r)
+	session := GetSession(r)
 	if session != nil {
 		session.Invalidate()
 	}
